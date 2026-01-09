@@ -7,9 +7,10 @@ import { TrashIcon } from './icons/TrashIcon';
 interface RiskFormProps {
   risks: Risk[];
   setRisks: React.Dispatch<React.SetStateAction<Risk[]>>;
+  errors?: { [id: number]: { [field: string]: string } };
 }
 
-const RiskForm: React.FC<RiskFormProps> = ({ risks, setRisks }) => {
+const RiskForm: React.FC<RiskFormProps> = ({ risks, setRisks, errors }) => {
   
   const addRisk = () => {
     const newRisk: Risk = {
@@ -52,8 +53,9 @@ const RiskForm: React.FC<RiskFormProps> = ({ risks, setRisks }) => {
                   value={risk.description}
                   onChange={(e) => handleRiskChange(risk.id, 'description', e.target.value)}
                   placeholder="e.g., Key supplier for component X might face delivery delays."
-                  className="w-full h-20 bg-slate-800 border border-slate-600 rounded-md p-2 focus:ring-1 focus:ring-teal-500 focus:border-teal-500"
+                  className={`w-full h-20 bg-slate-800 border rounded-md p-2 focus:ring-1 transition-colors ${errors?.[risk.id]?.description ? 'border-red-500 focus:ring-red-500' : 'border-slate-600 focus:ring-teal-500'}`}
               />
+              {errors?.[risk.id]?.description && <p className="text-red-400 text-xs mt-1">{errors[risk.id].description}</p>}
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
@@ -88,8 +90,9 @@ const RiskForm: React.FC<RiskFormProps> = ({ risks, setRisks }) => {
                   value={risk.responseStrategy}
                   onChange={(e) => handleRiskChange(risk.id, 'responseStrategy', e.target.value)}
                   placeholder="e.g., Mitigate by identifying an alternative supplier."
-                  className="w-full bg-slate-800 border border-slate-600 rounded-md p-2 focus:ring-1 focus:ring-teal-500 focus:border-teal-500"
+                  className={`w-full bg-slate-800 border rounded-md p-2 focus:ring-1 transition-colors ${errors?.[risk.id]?.responseStrategy ? 'border-red-500 focus:ring-red-500' : 'border-slate-600 focus:ring-teal-500'}`}
               />
+              {errors?.[risk.id]?.responseStrategy && <p className="text-red-400 text-xs mt-1">{errors[risk.id].responseStrategy}</p>}
           </div>
         </div>
       ))}

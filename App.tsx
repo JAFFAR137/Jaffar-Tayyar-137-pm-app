@@ -45,15 +45,65 @@ const App: React.FC = () => {
   const [generatedPlans, setGeneratedPlans] = useState<GeneratedPlans | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [validationErrors, setValidationErrors] = useState<any>({});
+
+
+  const validateInputs = useCallback(() => {
+    const errors: any = {
+        stakeholders: {},
+        risks: {},
+        schedule: {}
+    };
+
+    if (!projectDescription.trim()) {
+        errors.projectDescription = 'Project description is required.';
+    }
+
+    stakeholders.forEach(s => {
+        const stakeholderErrors: any = {};
+        if (!s.name.trim()) stakeholderErrors.name = 'Name is required.';
+        if (!s.role.trim()) stakeholderErrors.role = 'Role is required.';
+        if (!s.expectations.trim()) stakeholderErrors.expectations = 'Key expectations are required.';
+        if (Object.keys(stakeholderErrors).length > 0) {
+            errors.stakeholders[s.id] = stakeholderErrors;
+        }
+    });
+
+    if (!scheduleDetails.duration.trim()) errors.schedule.duration = 'Project duration is required.';
+    if (!scheduleDetails.milestones.trim()) errors.schedule.milestones = 'Key milestones are required.';
+    if (!scheduleDetails.reportingFrequency.trim()) errors.schedule.reportingFrequency = 'Reporting frequency is required.';
+    if (!scheduleDetails.controlThresholds.trim()) errors.schedule.controlThresholds = 'Control thresholds are required.';
+    
+    risks.forEach(r => {
+        const riskErrors: any = {};
+        if (!r.description.trim()) riskErrors.description = 'Risk description is required.';
+        if (!r.responseStrategy.trim()) riskErrors.responseStrategy = 'Response strategy is required.';
+        if (Object.keys(riskErrors).length > 0) {
+            errors.risks[r.id] = riskErrors;
+        }
+    });
+
+    // Clean up empty error objects
+    if (Object.keys(errors.stakeholders).length === 0) delete errors.stakeholders;
+    if (Object.keys(errors.risks).length === 0) delete errors.risks;
+    if (Object.keys(errors.schedule).length === 0) delete errors.schedule;
+
+    return errors;
+}, [projectDescription, stakeholders, scheduleDetails, risks]);
+
 
   const handleGeneratePlans = useCallback(async () => {
-    if (!projectDescription.trim()) {
-      setError('Project description is required.');
-      return;
+    setError(null);
+    setValidationErrors({});
+    
+    const validation = validateInputs();
+    if (Object.keys(validation).length > 0) {
+        setValidationErrors(validation);
+        setError('Please fix the validation errors before generating reports.');
+        return;
     }
     
     setIsLoading(true);
-    setError(null);
     setGeneratedPlans(null);
 
     try {
@@ -70,7 +120,7 @@ const App: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [projectDescription, stakeholders, scheduleDetails, risks]);
+  }, [projectDescription, stakeholders, scheduleDetails, risks, validateInputs]);
 
   const renderContent = () => {
     switch (activeTab) {
@@ -114,19 +164,20 @@ const App: React.FC = () => {
                   {/* Forms */}
                   <div className="bg-slate-800/50 rounded-xl shadow-lg p-6 border border-slate-700">
                     <h2 className="text-2xl font-bold text-teal-400 mb-4 flex items-center"><DocumentTextIcon className="h-6 w-6 mr-3" />1. Project Description</h2>
-                    <textarea value={projectDescription} onChange={(e) => setProjectDescription(e.target.value)} placeholder="Describe your project, its goals, and key deliverables..." className="w-full h-32 p-3 bg-slate-900 border border-slate-600 rounded-md focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"/>
+                    <textarea value={projectDescription} onChange={(e) => setProjectDescription(e.target.value)} placeholder="Describe your project, its goals, and key deliverables..." className={`w-full h-32 p-3 bg-slate-900 border rounded-md transition-colors ${validationErrors.projectDescription ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-slate-600 focus:ring-teal-500 focus:border-teal-500'}`}/>
+                    {validationErrors.projectDescription && <p className="text-red-400 text-sm mt-1">{validationErrors.projectDescription}</p>}
                   </div>
                   <div className="bg-slate-800/50 rounded-xl shadow-lg p-6 border border-slate-700">
                     <h2 className="text-2xl font-bold text-teal-400 mb-4 flex items-center"><UsersIcon className="h-6 w-6 mr-3" />2. Plan Stakeholder Engagement (5.2)</h2>
-                    <StakeholderForm stakeholders={stakeholders} setStakeholders={setStakeholders} />
+                    <StakeholderForm stakeholders={stakeholders} setStakeholders={setStakeholders} errors={validationErrors.stakeholders} />
                   </div>
                   <div className="bg-slate-800/50 rounded-xl shadow-lg p-6 border border-slate-700">
                     <h2 className="text-2xl font-bold text-teal-400 mb-4 flex items-center"><CalendarIcon className="h-6 w-6 mr-3" />3. Plan Schedule Management (3.1)</h2>
-                    <ScheduleForm scheduleDetails={scheduleDetails} setScheduleDetails={setScheduleDetails} />
+                    <ScheduleForm scheduleDetails={scheduleDetails} setScheduleDetails={setScheduleDetails} errors={validationErrors.schedule} />
                   </div>
                    <div className="bg-slate-800/50 rounded-xl shadow-lg p-6 border border-slate-700">
                     <h2 className="text-2xl font-bold text-teal-400 mb-4 flex items-center"><ShieldExclamationIcon className="h-6 w-6 mr-3" />4. Identify Risks</h2>
-                    <RiskForm risks={risks} setRisks={setRisks} />
+                    <RiskForm risks={risks} setRisks={setRisks} errors={validationErrors.risks} />
                   </div>
                   
                   {/* Generate Button */}

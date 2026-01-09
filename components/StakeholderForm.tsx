@@ -7,9 +7,10 @@ import { TrashIcon } from './icons/TrashIcon';
 interface StakeholderFormProps {
   stakeholders: Stakeholder[];
   setStakeholders: React.Dispatch<React.SetStateAction<Stakeholder[]>>;
+  errors?: { [id: number]: { [field: string]: string } };
 }
 
-const StakeholderForm: React.FC<StakeholderFormProps> = ({ stakeholders, setStakeholders }) => {
+const StakeholderForm: React.FC<StakeholderFormProps> = ({ stakeholders, setStakeholders, errors }) => {
   
   const addStakeholder = () => {
     const newStakeholder: Stakeholder = {
@@ -37,7 +38,7 @@ const StakeholderForm: React.FC<StakeholderFormProps> = ({ stakeholders, setStak
 
   return (
     <div className="space-y-6">
-      {stakeholders.map((stakeholder, index) => (
+      {stakeholders.map((stakeholder) => (
         <div key={stakeholder.id} className="p-4 bg-slate-900/70 border border-slate-700 rounded-lg space-y-4 relative">
           <button
               onClick={() => removeStakeholder(stakeholder.id)}
@@ -55,8 +56,9 @@ const StakeholderForm: React.FC<StakeholderFormProps> = ({ stakeholders, setStak
                       value={stakeholder.name}
                       onChange={(e) => handleStakeholderChange(stakeholder.id, 'name', e.target.value)}
                       placeholder="e.g., Jane Doe"
-                      className="w-full bg-slate-800 border border-slate-600 rounded-md p-2 focus:ring-1 focus:ring-teal-500 focus:border-teal-500"
+                      className={`w-full bg-slate-800 border rounded-md p-2 focus:ring-1 transition-colors ${errors?.[stakeholder.id]?.name ? 'border-red-500 focus:ring-red-500' : 'border-slate-600 focus:ring-teal-500'}`}
                   />
+                  {errors?.[stakeholder.id]?.name && <p className="text-red-400 text-xs mt-1">{errors[stakeholder.id].name}</p>}
               </div>
               <div>
                   <label className="block text-sm font-medium text-slate-400 mb-1">Role</label>
@@ -65,8 +67,9 @@ const StakeholderForm: React.FC<StakeholderFormProps> = ({ stakeholders, setStak
                       value={stakeholder.role}
                       onChange={(e) => handleStakeholderChange(stakeholder.id, 'role', e.target.value)}
                       placeholder="e.g., Marketing Director"
-                      className="w-full bg-slate-800 border border-slate-600 rounded-md p-2 focus:ring-1 focus:ring-teal-500 focus:border-teal-500"
+                      className={`w-full bg-slate-800 border rounded-md p-2 focus:ring-1 transition-colors ${errors?.[stakeholder.id]?.role ? 'border-red-500 focus:ring-red-500' : 'border-slate-600 focus:ring-teal-500'}`}
                   />
+                  {errors?.[stakeholder.id]?.role && <p className="text-red-400 text-xs mt-1">{errors[stakeholder.id].role}</p>}
               </div>
               <div>
                   <label className="block text-sm font-medium text-slate-400 mb-1">Interest</label>
@@ -100,8 +103,9 @@ const StakeholderForm: React.FC<StakeholderFormProps> = ({ stakeholders, setStak
                   value={stakeholder.expectations}
                   onChange={(e) => handleStakeholderChange(stakeholder.id, 'expectations', e.target.value)}
                   placeholder="e.g., Regular progress updates"
-                  className="w-full bg-slate-800 border border-slate-600 rounded-md p-2 focus:ring-1 focus:ring-teal-500 focus:border-teal-500"
+                  className={`w-full bg-slate-800 border rounded-md p-2 focus:ring-1 transition-colors ${errors?.[stakeholder.id]?.expectations ? 'border-red-500 focus:ring-red-500' : 'border-slate-600 focus:ring-teal-500'}`}
               />
+              {errors?.[stakeholder.id]?.expectations && <p className="text-red-400 text-xs mt-1">{errors[stakeholder.id].expectations}</p>}
           </div>
         </div>
       ))}
