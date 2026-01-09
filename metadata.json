@@ -1,0 +1,5 @@
+{
+  "name": "PMBOK AI Plan Generator",
+  "description": "An application that leverages AI to generate a Stakeholder Engagement Plan (PMBOK 5.2) and a Schedule Management Plan (PMBOK 3.1) based on user-provided project details.",
+  "requestFramePermissions": []
+}
